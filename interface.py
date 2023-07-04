@@ -39,32 +39,35 @@ class BotInterface():
                     
                     if not self.params['city']:
                         self.message_send(event.user_id, f'{self.params["name"]}, для продолжения поиска введите город проживания')
-                        self.params['city'] = command
+                        self.params['city'] = input(event.user_id)
                     elif not self.params['bdate']:
                         self.message_send(event.user_id, f'{self.params["name"]}, для продолжения поиска введите дату рождения')
-                        self.params['bdate'] = command
+                        self.params['bdate'] = input(event.user_id)
                     
                         
-                elif command == 'поиск':
+                elif command.lower() == 'поиск':
                     users = self.api.serch_users(self.params, self.offset)
-                    user = users.pop()
-                    if Viewed.profile_id == user['id']:
+                    for user in users:
                         user = users.pop()
+                        if Viewed.profile_id == user['id']:
+                            user = users.pop()
             
                     
-                    photos_user = self.api.get_photos(user["id"])                  
+                        photos_user = self.api.get_photos(user["id"])                  
                     
-                    attachment = ''
-                    for num, photo in enumerate(photos_user):
-                        attachment += f'photo{photo["owner_id"]}_{photo["id"]}'
-                        self.offset += 10
-                        if num == 2:
-                            break
-                    self.message_send(event.user_id,
+                        attachment = ''
+                        for num, photo in enumerate(photos_user):
+                            attachment += f'photo{photo["owner_id"]}_{photo["id"]}'
+                            self.offset += 10
+                            if num == 2:
+                                break
+                        else:
+                            self.message_send(event.user_id,
                                       f'Встречайте {user["name"]}, vk.com/{user["id"]}',
                                       attachment=attachment
                                       )
-                    Viewed.profile_id = user['id']
+                            Viewed.profile_id = user['id']
+                            user = users.pop()
                    
                         
                 elif command == 'пока':
