@@ -12,8 +12,9 @@ class BotInterface():
     def __init__(self,comunity_token, acces_token):
         self.interface = vk_api.VkApi(token=comunity_token)
         self.api = VkTools(acces_token)
-        self.params = None
+        self.params = {}
         self.offset = 0
+        self.users = []
 
 
     def message_send(self, user_id, message, attachment=None):
@@ -39,41 +40,48 @@ class BotInterface():
                     
                     if not self.params['city']:
                         self.message_send(event.user_id, f'{self.params["name"]}, для продолжения поиска введите город проживания')
-                        self.params['city'] = input(event.user_id)
+                        self.params['city'] = event.text.lower()
                     elif not self.params['bdate']:
                         self.message_send(event.user_id, f'{self.params["name"]}, для продолжения поиска введите дату рождения')
-                        self.params['bdate'] = input(event.user_id)
+                        self.params['bdate'] = event.text.lower()
                     
                         
                 elif command.lower() == 'поиск':
-                    users = self.api.serch_users(self.params, self.offset)
-                    for user in users:
-                        user = users.pop()
-                        if Viewed.profile_id == user['id']:
-                            user = users.pop()
-            
                     
+                    if self.users:
+                        user = self.users.pop()
                         photos_user = self.api.get_photos(user["id"])                  
-                    
                         attachment = ''
                         for num, photo in enumerate(photos_user):
                             attachment += f'photo{photo["owner_id"]}_{photo["id"]}'
-                            self.offset += 10
+                            
                             if num == 2:
                                 break
-                        else:
-                            self.message_send(event.user_id,
+                        
+                        
+                    else:
+                        self.users = self.api.serch_users(self.params, self.offset)
+                        user = self.users.pop()
+                        
+                        Viewed.profile_id = user['id']
+                        
+                        photos_user = self.api.get_photos(user["id"])                  
+                        attachment = ''
+                        for num, photo in enumerate(photos_user):
+                            attachment += f'photo{photo["owner_id"]}_{photo["id"]}'
+                            
+                        self.offset += 10
+                        
+                    self.message_send(event.user_id,
                                       f'Встречайте {user["name"]}, vk.com/{user["id"]}',
                                       attachment=attachment
                                       )
-                            Viewed.profile_id = user['id']
-                            user = users.pop()
-                   
-                        
+                                            
                 elif command == 'пока':
                     self.message_send(event.user_id, 'пока')
                 else:
                     self.message_send(event.user_id, 'команда не опознана')
+                    
                                 
 
 
