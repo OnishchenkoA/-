@@ -38,12 +38,12 @@ class BotInterface():
                     self.params = self.api.get_profile_info(event.user_id)
                     self.message_send(event.user_id, f'здравствуй {self.params["name"]}')
                     
-                    if not self.params['city']:
-                        self.message_send(event.user_id, f'{self.params["name"]}, для продолжения поиска введите город проживания')
-                        self.params['city'] = event.text.lower()
-                    elif not self.params['bdate']:
-                        self.message_send(event.user_id, f'{self.params["name"]}, для продолжения поиска введите дату рождения')
-                        self.params['bdate'] = event.text.lower()
+                elif not self.params['city']:
+                    self.message_send(event.user_id, f'{self.params["name"]}, для продолжения поиска введите город проживания')
+                    self.params['city'] = event.text.lower()
+                elif not self.params['bdate']:
+                    self.message_send(event.user_id, f'{self.params["name"]}, для продолжения поиска введите дату рождения')
+                    self.params['bdate'] = event.text.lower()
                     
                         
                 elif command.lower() == 'поиск':
